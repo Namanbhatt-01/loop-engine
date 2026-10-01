@@ -1,0 +1,30 @@
+version: "1.0"
+project:
+  name: "universal-loop-engine"
+  language: "go" # auto-detects cpp, go, python, rust, typescript
+  root: "."
+
+limits:
+  max_iterations: 3
+  timeout_seconds: 30
+  max_diff_lines: 250
+  memory_limit_mb: 512
+  cpu_cores: 2.0
+  budget_limit_usd: 2.00
+
+rules:
+  protected_paths:
+    - ".git/**"
+    - ".env*"
+    - "secrets/**"
+    - "*.pem"
+  banned_imports:
+    - "eval"
+    - "exec"
+    - "os.system"
+    - "shutil.rmtree"
+
+verification:
+  build_command: "go build ./..."
+  test_command: "go test ./..."
+  linter_command: "go vet ./..."

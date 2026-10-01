@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package engine;
+
+option go_package = "github.com/namanbhatt-01/loop-engine-core/pkg/pb";
+
+// The ControlPlane service manages task execution lifecycle
+service ControlPlane {
+  // Executes a TDD verification run inside the sandbox
+  rpc RunVerification (VerificationRequest) returns (VerificationResponse);
+  
+  // Checks and updates the loop iteration state and budget
+  rpc CheckCircuitBreaker (CircuitRequest) returns (CircuitResponse);
+  
+  // Creates an isolated Git worktree for safe iteration
+  rpc CreateSandboxWorktree (WorktreeRequest) returns (WorktreeResponse);
+}
+
+message VerificationRequest {
+  string task_id = 1;
+  string project_root = 2;
+  string test_command = 3;
+  string build_command = 4;
+  int32 timeout_seconds = 5;
+  map<string, string> environment_vars = 6;
+}
+
+message VerificationResponse {
+  bool success = 1;
+  int32 exit_code = 2;
+  string stdout = 3;
+  string stderr = 4;
+  int64 execution_time_ms = 5;
+  string error_message = 6;
+}
+
+message CircuitRequest {
+  string task_id = 1;
+  int32 current_iteration = 2;
+  int32 token_count = 3;
+  double estimated_cost_usd = 4;
+}
+
+message CircuitResponse {
+  bool allow_continuation = 1;
+  string reason = 2;
+  bool force_human_approval = 3;
+}
+
+message WorktreeRequest {
+  string task_id = 1;
+  string base_branch = 2;
+}
+
+message WorktreeResponse {
+  bool success = 1;
+  string worktree_path = 2;
+  string branch_name = 3;
+  string error_message = 4;
+}
