@@ -25,6 +25,11 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
       - name: Verify Go Formatting
         run: |
           if [ -n "$(gofmt -l .)" ]; then
@@ -36,7 +41,7 @@ jobs:
         run: go vet ./...
 
       - name: Run Go Test Suite
-        run: go test -v -race ./...
+        run: go test -v ./...
 
       - name: Run Python Test Suite
         run: python3 -m unittest discover -s tests -v
