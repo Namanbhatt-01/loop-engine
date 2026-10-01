@@ -11,13 +11,13 @@ import (
 type AgentState string
 
 const (
-	StateIdle       AgentState = "IDLE"
-	StateReasoning  AgentState = "REASONING"
-	StateParsed     AgentState = "PARSED"
-	StateVerifying  AgentState = "VERIFYING"
-	StateEvaluated  AgentState = "EVALUATED"
-	StateHalted     AgentState = "HALTED"
-	StateCompleted  AgentState = "COMPLETED"
+	StateIdle      AgentState = "IDLE"
+	StateReasoning AgentState = "REASONING"
+	StateParsed    AgentState = "PARSED"
+	StateVerifying AgentState = "VERIFYING"
+	StateEvaluated AgentState = "EVALUATED"
+	StateHalted    AgentState = "HALTED"
+	StateCompleted AgentState = "COMPLETED"
 )
 
 // validTransitions defines deterministic FSM transition rules
