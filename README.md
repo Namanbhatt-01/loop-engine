@@ -4,8 +4,8 @@
 
 ### Deterministic TDD Harness & Sandboxed Execution Control Plane
 
-[![CI](https://github.com/Namanbhatt-01/loop-engine-core/actions/workflows/ci.yml/badge.svg)](https://github.com/Namanbhatt-01/loop-engine-core/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Namanbhatt-01/loop-engine-core?color=7c3aed&label=Release)](https://github.com/Namanbhatt-01/loop-engine-core/releases)
+[![CI](https://github.com/Namanbhatt-01/loop-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/Namanbhatt-01/loop-engine/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Namanbhatt-01/loop-engine?color=7c3aed&label=Release)](https://github.com/Namanbhatt-01/loop-engine/releases)
 [![Go Version](https://img.shields.io/badge/go-1.22%2B-00ADD8.svg?logo=go)](https://golang.org)
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-3776AB.svg?logo=python)](https://python.org)
 [![M8ven Verified](https://m8ven.ai/badge/mcp/namanbhatt-01/loop-engine?variant=verified)](https://m8ven.ai/mcp/namanbhatt-01/loop-engine?s=readme)

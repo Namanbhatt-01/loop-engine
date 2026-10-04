@@ -36,7 +36,7 @@ loop-mcp = "python_engine.mcp.mcp_server:main"
 loop-engine = "python_engine.main:main"
 
 [project.urls]
-Homepage = "https://github.com/Namanbhatt-01/loop-engine-core"
-Repository = "https://github.com/Namanbhatt-01/loop-engine-core"
-Issues = "https://github.com/Namanbhatt-01/loop-engine-core/issues"
+Homepage = "https://github.com/Namanbhatt-01/loop-engine"
+Repository = "https://github.com/Namanbhatt-01/loop-engine"
+Issues = "https://github.com/Namanbhatt-01/loop-engine/issues"
 "M8ven Trust Index" = "https://m8ven.ai/mcp/namanbhatt-01/loop-engine"
