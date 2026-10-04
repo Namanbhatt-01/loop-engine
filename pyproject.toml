@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "loop-engine-core"
+version = "0.1.0"
+description = "High-Performance Autonomous Loop Harness & Compiler-Driven TDD Control Plane in Go & Python"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Naman Bhatt", email = "the.namanbhatt109@gmail.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Security",
+]
+dependencies = [
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "requests>=2.31.0",
+    "mcp>=1.0.0; python_version >= '3.10'",
+]
+
+[project.scripts]
+loop-mcp = "python_engine.mcp.mcp_server:main"
+loop-engine = "python_engine.main:main"
+
+[project.urls]
+Homepage = "https://github.com/Namanbhatt-01/loop-engine-core"
+Repository = "https://github.com/Namanbhatt-01/loop-engine-core"
+Issues = "https://github.com/Namanbhatt-01/loop-engine-core/issues"
+"M8ven Trust Index" = "https://m8ven.ai/mcp/namanbhatt-01/loop-engine"

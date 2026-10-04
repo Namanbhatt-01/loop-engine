@@ -8,6 +8,7 @@
 [![Release](https://img.shields.io/github/v/release/Namanbhatt-01/loop-engine-core?color=7c3aed&label=Release)](https://github.com/Namanbhatt-01/loop-engine-core/releases)
 [![Go Version](https://img.shields.io/badge/go-1.22%2B-00ADD8.svg?logo=go)](https://golang.org)
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-3776AB.svg?logo=python)](https://python.org)
+[![M8ven Verified](https://m8ven.ai/badge/mcp/namanbhatt-01/loop-engine?variant=verified)](https://m8ven.ai/mcp/namanbhatt-01/loop-engine?s=readme)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -15,6 +16,7 @@
   <a href="#-architecture">Architecture</a> •
   <a href="#-the-4-layer-security-model">Security Model</a> •
   <a href="#-universal-project-adapter">Universal Adapter</a> •
+  <a href="#-model-context-protocol-mcp-integration">MCP Server</a> •
   <a href="#-quickstart">Quickstart</a> •
   <a href="#-pair-programming-topology">Maker/Checker</a> •
   <a href="#-contributing">Contributing</a>
@@ -186,6 +188,45 @@ pip install -r requirements.txt
 ### 3. Launching the Autonomous Loop
 ```bash
 ./scripts/run_loop.sh
+```
+
+---
+
+## 🔌 Model Context Protocol (MCP) Integration
+
+Loop Engine Core natively implements the **[Model Context Protocol (MCP)](https://modelcontextprotocol.io/)**, allowing external frontier models and agentic harnesses (Claude Desktop, Cursor, Cline, Goose) to safely invoke deterministic verification and sandboxed execution as standard MCP tools.
+
+### Available MCP Tools
+
+| Tool Name | Description | Key Arguments |
+|:---|:---|:---|
+| `run_verification` | Triggers sandboxed TDD execution inside the Go Control Plane with process group isolation. | `task_id`, `project_root`, `test_command` |
+| `read_workspace_file` | Safely reads workspace file contents enforced by path jail confinement and protected asset filters. | `relative_path`, `workspace_root` |
+| `check_circuit_breaker` | Queries the Go daemon FSM for iteration boundary caps and dollar/token budget ceilings. | `task_id`, `iteration`, `added_tokens`, `added_cost` |
+| `verify_ast_guard` | Statically analyzes proposed Python code to defeat sandbox escapes (`__subclasses__`, eval, unauthorized imports). | `proposed_code` |
+
+### Environment Variables
+
+| Variable | Description | Default |
+|:---|:---|:---|
+| `LOOP_PORT` | Port for communication between the Python MCP server bridge and the Go Control Plane daemon. | `50051` |
+
+### Client Configuration (`claude_desktop_config.json`)
+
+To register Loop Engine in Claude Desktop or Cursor, add the following to your configuration file:
+
+```json
+{
+  "mcpServers": {
+    "loop-engine": {
+      "command": "python3",
+      "args": ["-m", "python_engine.mcp.mcp_server"],
+      "env": {
+        "LOOP_PORT": "50051"
+      }
+    }
+  }
+}
 ```
 
 ---

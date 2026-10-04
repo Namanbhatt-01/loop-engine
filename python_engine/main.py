@@ -133,7 +133,7 @@ class LoopReasoningEngine:
         print(f"=======================================================\n")
         return success
 
-if __name__ == "__main__":
+def main():
     engine = LoopReasoningEngine()
     engine.execute_loop(
         task_id="task-live-demo",
@@ -142,3 +142,8 @@ if __name__ == "__main__":
         test_command="python3 -m unittest tests/test_calculator.py",
         max_iters=3
     )
+
+
+if __name__ == "__main__":
+    main()
+
