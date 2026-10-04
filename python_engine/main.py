@@ -53,10 +53,8 @@ class LoopReasoningEngine:
 
     def execute_loop(self, task_id: str, task_prompt: str, target_file: str, test_command: str = "", max_iters: int = 3) -> bool:
         """Runs the complete Reason -> Act -> Observe -> Evaluate -> Repeat self-correction loop."""
-        print(f"\n=======================================================")
-        print(f"🚀 STARTING AUTONOMOUS LOOP [Task: {task_id}]")
-        print(f"🎯 Target File: {target_file}")
-        print(f"=======================================================\n")
+        print(f"\n[INFO] Starting loop execution for task: {task_id}")
+        print(f"[INFO] Target file: {target_file}")
 
         error_feedback = ""
         iteration = 1
@@ -66,12 +64,12 @@ class LoopReasoningEngine:
 
         try:
             while iteration <= max_iters:
-                print(f"🔄 --- ITERATION {iteration}/{max_iters} ---")
+                print(f"[INFO] --- Iteration {iteration}/{max_iters} ---")
 
                 # 1. Circuit Breaker Gate
                 circuit_resp = self.check_circuit_breaker(task_id, iteration, tokens=1200, cost=0.004)
                 if not circuit_resp.get("allow_continuation", True):
-                    print(f"🛑 CIRCUIT BREAKER TRIGGERED: {circuit_resp.get('reason')}")
+                    print(f"[WARN] Circuit breaker tripped: {circuit_resp.get('reason')}")
                     break
 
                 # Read current code if file exists
@@ -83,11 +81,11 @@ class LoopReasoningEngine:
                 # 2. Maker Agent synthesizes proposed solution/refactoring
                 proposal = self.maker.generate_solution(task_prompt, error_feedback, current_code)
                 code = proposal["proposed_code"]
-                print(f"✍️  [{self.maker.name}] Synthesized solution ({len(code.splitlines())} lines)")
+                print(f"[INFO] [{self.maker.name}] Generated patch proposal ({len(code.splitlines())} lines)")
 
                 # 3. Checker Agent verifies AST and path rules
                 approved, check_msg = self.checker.evaluate_proposal(target_file, code)
-                print(f"🛡️  {check_msg}")
+                print(f"[INFO] {check_msg}")
                 if not approved:
                     error_feedback = check_msg
                     iteration += 1
@@ -95,10 +93,10 @@ class LoopReasoningEngine:
 
                 # 4. Apply patch to workspace
                 self.patcher.apply_patch(target_file, code)
-                print(f"💾 Applied patch to '{target_file}'")
+                print(f"[INFO] Applied patch to '{target_file}'")
 
                 # 5. Run Sandboxed TDD Verification via Go Control Plane
-                print(f"⚡ Requesting Sandboxed TDD Verification from Go Control Plane...")
+                print(f"[INFO] Dispatching verification to Go control plane sandbox...")
                 verify_res = self.run_sandbox_verification(task_id, self.workspace_root, test_cmd=test_command)
 
                 exit_code = verify_res.get("exit_code", verify_res.get("ExitCode", 1))
@@ -106,31 +104,29 @@ class LoopReasoningEngine:
                 stderr = verify_res.get("stderr", verify_res.get("Stderr", ""))
 
                 if exit_code == 0:
-                    print(f"\n✅ SUCCESS! All sandboxed verification tests passed (Exit Code 0).")
-                    print(f"🎉 Code refactoring validated and committed!")
+                    print(f"[INFO] Verification passed (exit code 0).")
+                    print(f"[INFO] Changes committed to workspace.")
                     self.patcher.commit()
                     success = True
                     break
                 else:
-                    print(f"❌ TDD Verification Failed (Exit Code {exit_code}).")
+                    print(f"[WARN] Verification failed (exit code {exit_code}).")
                     combined_err = f"{stderr}\n{stdout}".strip()
-                    print(f"🔍 [Diagnostics Details]:\n{combined_err}\n")
+                    print(f"[DEBUG] Diagnostics output:\n{combined_err}\n")
                     error_feedback = f"Subprocess Exit Code {exit_code}:\n{combined_err}"
-                    print(f"📋 Diagnostics captured. Routing error feedback back to Maker for iteration {iteration + 1}...")
+                    print(f"[INFO] Routing diagnostics back to Maker for iteration {iteration + 1}...")
                     iteration += 1
 
             if not success:
-                print(f"⚠️  Task did not converge within {max_iters} iterations. Rolling back workspace...")
+                print(f"[WARN] Task did not converge within {max_iters} iterations. Rolling back workspace...")
                 self.patcher.rollback_all()
 
         except Exception as e:
-            print(f"💥 Unhandled exception during loop: {e}. Performing safe rollback...")
+            print(f"[ERROR] Unhandled exception during loop: {e}. Performing safe rollback...")
             self.patcher.rollback_all()
             raise e
 
-        print(f"\n=======================================================")
-        print(f"🏁 LOOP EXECUTION CONCLUDED [Status: {'PASSED' if success else 'FAILED'}]")
-        print(f"=======================================================\n")
+        print(f"[INFO] Loop execution completed. Status: {'SUCCESS' if success else 'FAILURE'}\n")
         return success
 
 def main():

@@ -24,7 +24,7 @@ class LLMClient:
             try:
                 return self._call_ollama(system_prompt, user_prompt)
             except Exception as e:
-                print(f"⚠️  [LLMClient] Ollama call failed ({e}), attempting fallback...")
+                print(f"[WARN] [LLMClient] Ollama call failed ({e}), attempting fallback...")
 
         # 2. Try Gemini API
         gemini_key = os.getenv("GEMINI_API_KEY")
@@ -32,7 +32,7 @@ class LLMClient:
             try:
                 return self._call_gemini(gemini_key, system_prompt, user_prompt)
             except Exception as e:
-                print(f"⚠️  [LLMClient] Gemini call failed ({e}), attempting fallback...")
+                print(f"[WARN] [LLMClient] Gemini call failed ({e}), attempting fallback...")
 
         # 3. Deterministic Algorithmic Solver Fallback
         return self._algorithmic_fallback(user_prompt)

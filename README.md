@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🔁 Loop Engine Core
+# Loop Engine Core
 
-### **High-Performance Autonomous Loop Harness & Compiler-Driven TDD Control Plane**
+### Deterministic TDD Harness & Sandboxed Execution Control Plane
 
 [![CI](https://github.com/Namanbhatt-01/loop-engine-core/actions/workflows/ci.yml/badge.svg)](https://github.com/Namanbhatt-01/loop-engine-core/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Namanbhatt-01/loop-engine-core?color=7c3aed&label=Release)](https://github.com/Namanbhatt-01/loop-engine-core/releases)
@@ -13,34 +13,35 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 <p align="center">
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-the-4-layer-security-model">Security Model</a> •
-  <a href="#-universal-project-adapter">Universal Adapter</a> •
-  <a href="#-model-context-protocol-mcp-integration">MCP Server</a> •
-  <a href="#-quickstart">Quickstart</a> •
-  <a href="#-pair-programming-topology">Maker/Checker</a> •
-  <a href="#-contributing">Contributing</a>
+  <a href="#overview">Overview</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#security-model">Security Model</a> •
+  <a href="#universal-project-adapter">Universal Adapter</a> •
+  <a href="#model-context-protocol-mcp-integration">MCP Server</a> •
+  <a href="#quickstart">Quickstart</a> •
+  <a href="#verification-topology-maker-vs-checker">Topology</a> •
+  <a href="#contributing">Contributing</a>
 </p>
 
 </div>
 
 ---
 
-## 📌 Executive Summary
+## Overview
 
-Modern AI coding agents fail when left unconstrained: they hallucinate APIs, leak host credentials, get stuck in infinite retry loops, and flood context windows with bloated logs. 
+Autonomous code generators and agentic systems frequently encounter unbounded retries, hallucinations, memory exhaustion, and unvalidated modifications when left without deterministic constraints.
 
-**Loop Engine Core** solves this by treating autonomous agent execution as a **deterministic, kernel-hardened control problem**. It pairs a high-performance **Go Control Plane & Sandbox Substrate** with an intelligent **Python Reasoning Engine**, driving iterative code generation through a strict **Reason → Act → Observe → Evaluate → Repeat** lifecycle.
+**Loop Engine Core** models automated development as a bounded control problem. It combines a high-performance **Go control plane and sandbox operator** with a **Python reasoning engine**, driving iterations through a strict **Reason -> Act -> Observe -> Evaluate -> Repeat** execution cycle.
 
-Instead of soft "LLM-as-a-judge" self-grading, Loop Engine Core enforces **compiler diagnostics, exit codes, POSIX kernel resource boundaries, and static AST security verification** as physical stopping conditions.
+Stopping conditions and patch validity are governed by **compiler diagnostics, process exit codes, POSIX kernel resource boundaries, and static AST security verification** rather than subjective model scoring.
 
 ---
 
-## 🏛️ Architecture
+## Architecture
 
 ```
                +-------------------------------------------------+
-               |  USER / TRIGGER (Webhook, Issue, Slack, CLI)    |
+               |  Caller / Trigger (CLI, Webhook, MCP Client)    |
                +-------------------------------------------------+
                                        |
                                        v
@@ -52,58 +53,56 @@ Instead of soft "LLM-as-a-judge" self-grading, Loop Engine Core enforces **compi
 +---------------------------------------------------------------------------------+
                           |                         ^
         1. Spawn Engine   |                         | 4. Return Status
-        (HTTP / gRPC)     v                         | (Validated JSON)
+        (HTTP / IPC)      v                         | (Validated JSON)
 +---------------------------------------------------------------------------------+
-|                   PYTHON REASONING & PAIR-PROGRAMMING ENGINE                    |
-|  - AST Static Guardrail (Escape Defeated)             - Path Confinement Jail   |
+|                         PYTHON REASONING ENGINE                                 |
+|  - AST Static Guardrail                               - Path Confinement Jail   |
 |  - Maker Agent (Code Driver)                          - Checker Agent (Judge)   |
-|  - Transactional Workspace Patcher                    - Local Ollama & Frontier |
+|  - Transactional Workspace Patcher                    - MCP Server Provider     |
 +---------------------------------------------------------------------------------+
                           |                         ^
         2. Execute Tests  |                         | 3. Diagnostics
         (Kernel Sandbox)  v                         | (STDOUT / STDERR)
 +---------------------------------------------------------------------------------+
-|              HARDENED RUNTIME SUBSTRATE (ulimit & setpgid SIGKILL)             |
+|              SANDBOXED RUNTIME SUBSTRATE (ulimit & setpgid SIGKILL)             |
 +---------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 🛡️ The 4-Layer Security Model
+## Security Model
 
-Execution of generated code is gated through a multi-tiered defense matrix:
+Code execution and workspace modifications pass through a four-stage defense matrix:
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│ Layer 1: Static AST Guard (Sandbox Escape Defeated)                                     │
-│  • Deep AST traversal blocking __subclasses__, __globals__, __builtins__, getattr      │
-│  • Whitelist/blacklist blocking unvetted imports (os, subprocess, pty, socket, ctypes) │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ Layer 2: Path & Diff Jail Confinement (Traversal Defeated)                             │
-│  • Canonical path resolution (os.path.commonpath) preventing ../../ workspace escapes  │
-│  • Strict read-only locks on protected assets (.env*, .git/**, secrets/**, *.pem)      │
-│  • Max diff line limit (e.g. 250 lines/iteration) preventing massive runaway rewrites  │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ Layer 3: Kernel Sandbox Substrate (Resource & Process Tree Hardening)                  │
-│  • Setpgid: true runs commands in dedicated OS process groups                          │
-│  • Subtree termination via syscall.Kill(-pgid, SIGKILL) eliminating orphan leaks       │
-│  • POSIX ulimit boundaries (ulimit -n 1024, ulimit -t <timeout>)                      │
-│  • Bounded 2MB stream buffers preventing Host OOM memory exhaustion attacks            │
-├────────────────────────────────────────────────────────────────────────────────────────┤
-│ Layer 4: Deterministic Circuit Breakers & Token Budget                                 │
-│  • Hard iteration cap (default: 3 max) preventing infinite retry loops                 │
-│  • Real-time dollar and token budget exhaustion ceilings                               │
-│  • Transactional Workspace Patcher automatically reverts files on convergence failure  │
-└────────────────────────────────────────────────────────────────────────────────────────┘
++----------------------------------------------------------------------------------------+
+| Layer 1: Static AST Guard                                                              |
+|  * AST traversal blocks __subclasses__, __globals__, __builtins__, getattr             |
+|  * Policy checks reject unauthorized imports (os, subprocess, pty, socket, ctypes)    |
++----------------------------------------------------------------------------------------+
+| Layer 2: Path & Diff Jail Confinement                                                  |
+|  * Canonical path resolution (os.path.commonpath) prevents workspace escapes           |
+|  * Strict read-only locks protect sensitive assets (.env*, .git/**, secrets/**, *.pem) |
+|  * Diff line limits restrict runaway rewrites per iteration                            |
++----------------------------------------------------------------------------------------+
+| Layer 3: Kernel Sandbox Substrate                                                      |
+|  * Process group isolation (Setpgid: true)                                             |
+|  * Subtree termination via syscall.Kill(-pgid, SIGKILL) eliminates orphan processes    |
+|  * POSIX ulimit boundaries constrain file descriptors and execution time               |
+|  * Bounded 2MB stream buffers prevent memory exhaustion from verbose logging           |
++----------------------------------------------------------------------------------------+
+| Layer 4: Deterministic Circuit Breakers                                                |
+|  * Hard iteration limits prevent infinite cycles                                       |
+|  * Cost and token ceilings restrict resource expenditure                               |
+|  * Transactional patcher automatically rolls back files on convergence failure         |
++----------------------------------------------------------------------------------------+
 ```
 
 ---
 
-## ⚙️ Universal Project Adapter (`Loopfile.yaml`)
+## Universal Project Adapter (`Loopfile.yaml`)
 
-Loop Engine Core is **polyglot and stack-agnostic**. It attaches cleanly to **C++, Go, Python, Rust, and TypeScript** codebases.
-
-Drop a `Loopfile.yaml` into your repository root (or let the engine auto-detect your stack):
+Loop Engine Core is language-agnostic. It adapts to **C++, Go, Python, Rust, and TypeScript** repositories through a root configuration file or automatic stack detection:
 
 ```yaml
 version: "1.0"
@@ -137,32 +136,32 @@ verification:
 
 ---
 
-## 👥 Pair Programming Topology: Maker vs. Checker
+## Verification Topology: Maker vs. Checker
 
-To prevent confirmation bias, generation is strictly separated from evaluation:
+To prevent confirmation bias, code generation is decoupled from validation:
 
-* **The Maker (Driver)**: Reads issue requirements, existing file context, and prior compiler diagnostics. Formulates minimal, surgical code diffs.
-* **The Checker (Judge & Navigator)**: Evaluates proposed diffs against AST security policies, path jail rules, and style constraints.
-* **The Scorekeeper Gate**: The Go substrate runs the sandboxed build & test command. Only when exit code is `0` does the engine commit the changes.
+* **Maker (Driver)**: Consumes requirements, current implementation context, and prior compiler diagnostics to formulate targeted diffs.
+* **Checker (Judge)**: Validates diffs against AST security policies, path rules, and diff budgets before application.
+* **Gatekeeper**: The Go sandbox executes the build and test commands in an isolated environment. Changes are committed only upon exit code `0`.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    participant Maker as Maker Agent (Driver)
-    participant Checker as Checker Agent (Judge)
+    participant Maker as Maker Agent
+    participant Checker as Checker Agent
     participant Go as Go Control Plane
-    participant Sandbox as Hardened Sandbox
+    participant Sandbox as Sandbox Substrate
 
     Maker->>Checker: Propose Code Diff
     Checker->>Checker: Validate AST & Path Rules
     alt Violation Detected
-        Checker-->>Maker: Reject with Syntax/Security Feedback
+        Checker-->>Maker: Return Security/Syntax Feedback
     else Approved
         Checker->>Go: Apply Patch & Trigger Verification
         Go->>Sandbox: Execute Test Suite in Process Group
         Sandbox-->>Go: Capture exit_code, stdout, stderr
         alt Exit Code != 0
-            Go-->>Maker: Route Compiler/Test Diagnostics for Refactoring
+            Go-->>Maker: Route Diagnostics for Next Iteration
         else Exit Code == 0
             Go->>Go: Commit Transaction to Workspace
         end
@@ -171,49 +170,36 @@ sequenceDiagram
 
 ---
 
-## 🚀 Quickstart
+## Model Context Protocol (MCP) Integration
 
-### 1. Prerequisites
-- **Go**: `1.22+`
-- **Python**: `3.9+`
-- *(Optional)* **Ollama**: running locally on `http://localhost:11434` for 100% offline, zero-data-leak execution.
+Loop Engine Core implements the **[Model Context Protocol (MCP)](https://modelcontextprotocol.io/)**, allowing external clients (Claude Desktop, Cursor, Cline, Goose) to invoke verification and sandbox capabilities via standard JSON-RPC.
 
-### 2. Installation
-```bash
-git clone https://github.com/Namanbhatt-01/loop-engine-core.git
-cd loop-engine-core
-pip install -r requirements.txt
-```
+### Available Tools
 
-### 3. Launching the Autonomous Loop
-```bash
-./scripts/run_loop.sh
-```
-
----
-
-## 🔌 Model Context Protocol (MCP) Integration
-
-Loop Engine Core natively implements the **[Model Context Protocol (MCP)](https://modelcontextprotocol.io/)**, allowing external frontier models and agentic harnesses (Claude Desktop, Cursor, Cline, Goose) to safely invoke deterministic verification and sandboxed execution as standard MCP tools.
-
-### Available MCP Tools
-
-| Tool Name | Description | Key Arguments |
+| Tool Name | Description | Parameters |
 |:---|:---|:---|
-| `run_verification` | Triggers sandboxed TDD execution inside the Go Control Plane with process group isolation. | `task_id`, `project_root`, `test_command` |
-| `read_workspace_file` | Safely reads workspace file contents enforced by path jail confinement and protected asset filters. | `relative_path`, `workspace_root` |
-| `check_circuit_breaker` | Queries the Go daemon FSM for iteration boundary caps and dollar/token budget ceilings. | `task_id`, `iteration`, `added_tokens`, `added_cost` |
-| `verify_ast_guard` | Statically analyzes proposed Python code to defeat sandbox escapes (`__subclasses__`, eval, unauthorized imports). | `proposed_code` |
+| `run_verification` | Runs sandboxed build and TDD verification inside the Go control plane. | `task_id`, `project_root`, `test_command` |
+| `read_workspace_file` | Safely reads workspace files with path confinement and protected path filters. | `relative_path`, `workspace_root` |
+| `check_circuit_breaker` | Queries the control plane FSM for iteration boundary and budget limits. | `task_id`, `iteration`, `added_tokens`, `added_cost` |
+| `verify_ast_guard` | Analyzes code statically to detect sandbox escapes and forbidden imports. | `proposed_code` |
+
+### Resources and Prompts
+
+* **Resources**:
+  * `loop://config`: Reads the active `Loopfile.yaml` configuration.
+  * `loop://health`: Returns the health and readiness status of the Go control plane daemon.
+* **Prompts**:
+  * `autonomous_tdd_cycle`: Provides standard Maker/Checker execution guidelines to host LLMs.
 
 ### Environment Variables
 
 | Variable | Description | Default |
 |:---|:---|:---|
-| `LOOP_PORT` | Port for communication between the Python MCP server bridge and the Go Control Plane daemon. | `50051` |
+| `LOOP_PORT` | Port for IPC between the Python MCP server and Go daemon. | `50051` |
 
 ### Client Configuration (`claude_desktop_config.json`)
 
-To register Loop Engine in Claude Desktop or Cursor, add the following to your configuration file:
+To add Loop Engine to Claude Desktop or Cursor:
 
 ```json
 {
@@ -231,60 +217,83 @@ To register Loop Engine in Claude Desktop or Cursor, add the following to your c
 
 ---
 
-## 🧪 Comprehensive Test Suite
+## Quickstart
 
-Loop Engine Core features 100% automated test coverage across both Go and Python substrates:
+### 1. Prerequisites
+* **Go**: `1.22+`
+* **Python**: `3.9+`
+* *(Optional)* **Ollama**: running locally on `http://localhost:11434` for local execution.
+
+### 2. Installation
+```bash
+git clone https://github.com/Namanbhatt-01/loop-engine.git
+cd loop-engine
+pip install -r requirements.txt
+```
+
+### 3. Launching
+```bash
+./scripts/run_loop.sh
+```
+
+---
+
+## Test Suite
+
+Automated test suites validate Go and Python substrates:
 
 ```bash
-# Run Go Control Plane & Sandbox test suite
+# Go control plane and sandbox tests
 go test -v ./...
 
-# Run Python Guardrails, AST, and Transactional Patcher tests
+# Python AST guardrails, patcher, and MCP server tests
 python3 -m unittest discover -s tests -v
 ```
 
 ---
 
-## 📂 Repository Structure
+## Repository Structure
 
 ```
-loop-engine-core/
-├── Loopfile.yaml                  # Universal project configuration
+loop-engine/
+├── Loopfile.yaml                  # Project configuration
+├── pyproject.toml                 # Python package definition & console scripts
 ├── cmd/
 │   └── daemon/
-│       └── main.go                # Go Control Plane HTTP/IPC Daemon
+│       └── main.go                # Go control plane HTTP/IPC daemon
 ├── pkg/
 │   ├── config/                    # Loopfile parser & stack auto-detection
-│   ├── sandbox/                   # Kernel sandbox, ulimit governor & worktree
-│   ├── state/                     # Formal FSM state machine & circuit breakers
-│   └── tdd/                       # Subprocess test runner with timeout controls
+│   ├── sandbox/                   # Kernel sandbox, ulimit governor & worktrees
+│   ├── state/                     # FSM state machine & circuit breakers
+│   └── tdd/                       # Subprocess test runner with timeout control
 ├── python_engine/
 │   ├── agents/
-│   │   ├── maker.py               # Maker Agent (Driver / Code Author)
-│   │   └── checker.py             # Checker Agent (Judge / Scorekeeper)
+│   │   ├── maker.py               # Maker Agent (Driver)
+│   │   └── checker.py             # Checker Agent (Judge)
 │   ├── guardrails/
-│   │   ├── ast_guard.py           # AST static analyzer & escape defense
-│   │   └── diff_limiter.py        # Path jail confinement & diff limiter
+│   │   ├── ast_guard.py           # AST static analyzer & escape defenses
+│   │   └── diff_limiter.py        # Path confinement & diff limiter
 │   ├── llm/
-│   │   └── client.py              # Multi-provider client (Ollama / Gemini / Fallback)
+│   │   └── client.py              # LLM client (Ollama / Gemini / Fallback)
+│   ├── mcp/
+│   │   └── mcp_server.py          # FastMCP server & JSON-RPC bridge
 │   ├── patcher/
-│   │   └── patcher.py             # Transactional patcher with snapshot rollback
+│   │   └── patcher.py             # Transactional workspace patcher
 │   └── main.py                    # Autonomous loop driver
-├── tests/                         # End-to-end Python test suites
+├── tests/                         # Unit tests
 ├── scripts/
-│   └── run_loop.sh                # End-to-end automated launcher
-├── SKILL.md                       # Persistent agent skill guidelines
+│   └── run_loop.sh                # Build and run script
 └── .github/workflows/ci.yml       # GitHub Actions CI workflow
 ```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) and our [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before opening a pull request.
+Contributions are welcome. Please consult [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before submitting pull requests.
 
 ---
 
-## 📄 License
+## License
 
-This project is licensed under the [MIT License](LICENSE). Copyright © 2026 Naman Bhatt.
+This project is licensed under the [MIT License](LICENSE). Copyright (c) 2026 Naman Bhatt.

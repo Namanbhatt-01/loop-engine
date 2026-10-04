@@ -3,7 +3,7 @@ name: loop-engineering
 description: Rules, architectural patterns, and execution constraints for autonomous loop engineering, compiler-driven TDD verification, and sandboxed self-correction.
 ---
 
-# 🔁 Loop Engineering Skill Guidelines
+# Loop Engineering Skill Guidelines
 
 ## 1. Core Operating Principles
 - **Maker/Checker Separation**: Code generation is decoupled from grading. The Maker agent synthesizes code proposals, while the Checker agent acts as an independent validator.

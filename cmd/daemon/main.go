@@ -73,14 +73,14 @@ func main() {
 	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		log.Printf("🚀 Loop Engine Go Control Plane Daemon running on %s (Project: %s, Lang: %s)", addr, cfg.Project.Name, cfg.Project.Language)
+		log.Printf("Control plane daemon running on %s (project: %s, lang: %s)", addr, cfg.Project.Name, cfg.Project.Language)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Daemon server failed: %v", err)
 		}
 	}()
 
 	<-stopChan
-	log.Println("🛑 Shutdown signal received. Performing graceful shutdown...")
+	log.Println("Shutdown signal received. Performing graceful shutdown...")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -88,7 +88,7 @@ func main() {
 	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Printf("Error during server shutdown: %v", err)
 	}
-	log.Println("👋 Control Plane Daemon safely exited.")
+	log.Println("Control plane daemon exited cleanly.")
 }
 
 func (d *ControlDaemon) handleVerify(w http.ResponseWriter, r *http.Request) {
