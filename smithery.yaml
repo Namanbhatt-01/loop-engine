@@ -1,0 +1,13 @@
+version: "1.0"
+server:
+  name: "loop-engine"
+  description: "High-Performance Autonomous Loop Harness & Compiler-Driven TDD Control Plane in Go & Python"
+startCommand:
+  type: "stdio"
+  command: "python3"
+  args: ["-m", "python_engine.mcp.mcp_server"]
+  env:
+    LOOP_PORT:
+      type: "string"
+      description: "Go control plane daemon IPC port"
+      default: "50051"

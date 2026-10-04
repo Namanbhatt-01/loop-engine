@@ -138,6 +138,11 @@ except ImportError:
                                 "name": k,
                                 "description": v["description"],
                                 "inputSchema": v["inputSchema"],
+                                "annotations": {
+                                    "readOnlyHint": k != "run_verification",
+                                    "destructiveHint": False,
+                                    "idempotentHint": k != "run_verification",
+                                },
                             }
                             for k, v in self._tools.items()
                         ]
@@ -385,6 +390,11 @@ class MCPServerBridge:
                 {
                     "name": "run_verification",
                     "description": "Trigger TDD test execution in Go Control Plane Sandbox",
+                    "annotations": {
+                        "readOnlyHint": False,
+                        "destructiveHint": False,
+                        "idempotentHint": False,
+                    },
                     "inputSchema": {
                         "type": "object",
                         "properties": {
@@ -397,6 +407,11 @@ class MCPServerBridge:
                 {
                     "name": "read_workspace_file",
                     "description": "Read file contents safely from target workspace with path confinement",
+                    "annotations": {
+                        "readOnlyHint": True,
+                        "destructiveHint": False,
+                        "idempotentHint": True,
+                    },
                     "inputSchema": {
                         "type": "object",
                         "properties": {
@@ -409,6 +424,11 @@ class MCPServerBridge:
                 {
                     "name": "check_circuit_breaker",
                     "description": "Query Go Control Plane circuit breaker for budget and iteration limits",
+                    "annotations": {
+                        "readOnlyHint": True,
+                        "destructiveHint": False,
+                        "idempotentHint": True,
+                    },
                     "inputSchema": {
                         "type": "object",
                         "properties": {
@@ -422,6 +442,11 @@ class MCPServerBridge:
                 {
                     "name": "verify_ast_guard",
                     "description": "Verify code safety using static AST analysis",
+                    "annotations": {
+                        "readOnlyHint": True,
+                        "destructiveHint": False,
+                        "idempotentHint": True,
+                    },
                     "inputSchema": {
                         "type": "object",
                         "properties": {

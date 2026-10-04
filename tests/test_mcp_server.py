@@ -32,6 +32,9 @@ class TestMCPServer(unittest.TestCase):
         self.assertIn("read_workspace_file", tool_names)
         self.assertIn("check_circuit_breaker", tool_names)
         self.assertIn("verify_ast_guard", tool_names)
+        for tool in tools_def["tools"]:
+            self.assertIn("annotations", tool)
+            self.assertIn("readOnlyHint", tool["annotations"])
 
     def test_read_workspace_file_safe(self):
         res = self.bridge.execute_tool("read_workspace_file", {"relative_path": "Loopfile.yaml"})

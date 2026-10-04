@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json.schemastore.org/mcp.json",
+  "name": "loop-engine",
+  "version": "0.1.0",
+  "description": "High-Performance Autonomous Loop Harness & Compiler-Driven TDD Control Plane in Go & Python",
+  "license": "MIT",
+  "author": "Naman Bhatt",
+  "repository": "https://github.com/Namanbhatt-01/loop-engine",
+  "tools": [
+    {
+      "name": "run_verification",
+      "description": "Trigger sandboxed TDD test execution in Go Control Plane Sandbox",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_id": { "type": "string", "default": "mcp-verify" },
+          "project_root": { "type": "string", "default": "." },
+          "test_command": { "type": "string", "default": "" }
+        }
+      }
+    },
+    {
+      "name": "read_workspace_file",
+      "description": "Read file contents safely from target workspace with path confinement and protected asset locking",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "relative_path": { "type": "string" },
+          "workspace_root": { "type": "string", "default": "." }
+        },
+        "required": ["relative_path"]
+      }
+    },
+    {
+      "name": "check_circuit_breaker",
+      "description": "Query Go Control Plane circuit breaker for budget and iteration limits",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task_id": { "type": "string", "default": "mcp-task" },
+          "iteration": { "type": "integer", "default": 1 },
+          "added_tokens": { "type": "integer", "default": 0 },
+          "added_cost": { "type": "number", "default": 0.0 }
+        }
+      }
+    },
+    {
+      "name": "verify_ast_guard",
+      "description": "Verify code safety using static AST analysis to defeat sandbox escapes",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "proposed_code": { "type": "string" }
+        },
+        "required": ["proposed_code"]
+      }
+    }
+  ],
+  "resources": [
+    {
+      "uri": "loop://config",
+      "name": "Loopfile Config",
+      "mimeType": "text/yaml",
+      "description": "Active Loopfile.yaml configuration"
+    },
+    {
+      "uri": "loop://health",
+      "name": "Control Plane Health",
+      "mimeType": "application/json",
+      "description": "Go Control Plane daemon status and readiness"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "autonomous_tdd_cycle",
+      "description": "Generates structured prompt template for autonomous Maker/Checker TDD iteration"
+    }
+  ]
+}
